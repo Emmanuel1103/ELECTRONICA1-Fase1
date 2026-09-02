@@ -91,7 +91,7 @@
         </div>
 
         <div class="cover__visual">
-          <img class="img-slot img-slot--tall" src="D:\Descargas\ELECTRONICA 1\Gemini_Generated_Image_ml5ae6ml5ae6ml5a.jpg" alt="foto o render del módulo de iluminación">
+          <img class="img-slot img-slot--tall" src="./imagenes/Gemini_Generated_Image_ml5ae6ml5ae6ml5a.jpg" alt="foto o render del módulo de iluminación">
         </div>
       </div>
     </section>
@@ -123,7 +123,7 @@
           </div>
         </div>
 
-        <img class="img-slot img-slot--wide" style="margin-top: 18px;" src="D:\Descargas\ELECTRONICA 1\Gemini_Generated_Image_dzn68tdzn68tdzn6.jpg" alt="pasillo/bodega con iluminación intermitente, o diagrama de bloques del sistema">
+        <img class="img-slot img-slot--wide" style="margin-top: 18px;" src="./imagenes/Gemini_Generated_Image_dzn68tdzn68tdzn6.jpg" alt="pasillo/bodega con iluminación intermitente, o diagrama de bloques del sistema">
       </div>
     </section>
 
@@ -159,7 +159,7 @@
           </div>
         </div>
 
-        <img class="img-slot img-slot--wide" style="margin-top: 18px;" src="D:\Descargas\ELECTRONICA 1\Gemini_Generated_Image_rag30arag30arag3.jpg" alt="gráfico de ahorro energético o comparación de consumo antes/después">
+        <img class="img-slot img-slot--wide" style="margin-top: 18px;" src="./imagenes/Gemini_Generated_Image_rag30arag30arag3.jpg" alt="gráfico de ahorro energético o comparación de consumo antes/después">
       </div>
     </section>
 
@@ -208,7 +208,7 @@
           </div>
         </div>
 
-        <img class="img-slot img-slot--wide" style="margin-top: 18px;" src="D:\Descargas\ELECTRONICA 1\Gemini_Generated_Image_lklc8xlklc8xlklc.jpg" alt="mapa de objetivos o línea de tiempo del proyecto">
+        <img class="img-slot img-slot--wide" style="margin-top: 18px;" src="./imagenes/Gemini_Generated_Image_lklc8xlklc8xlklc.jpg" alt="mapa de objetivos o línea de tiempo del proyecto">
       </div>
     </section>
 
@@ -304,7 +304,7 @@
           </li>
         </ul>
 
-        <img class="img-slot img-slot--wide" style="margin-top: 18px;" src="D:\Descargas\ELECTRONICA 1\ldr (1).jpg" alt="curva característica del LDR, símbolo del diodo o datasheet del BJT/MOSFET">
+        <img class="img-slot img-slot--wide" style="margin-top: 18px;" src="./imagenes/ldr (1).jpg" alt="curva característica del LDR, símbolo del diodo o datasheet del BJT/MOSFET">
       </div>
     </section>
 
@@ -365,7 +365,7 @@
           </div>
 
           <div class="tabs__panel is-active" data-panel="alt1">
-            <img class="img-slot" style="margin-bottom: 18px; aspect-ratio: 16/6;" src="D:\Descargas\ELECTRONICA 1\WhatsApp Image 2026-09-01 at 9.34.23 PM.jpeg" alt="esquemático de la Alternativa 1 (LDR + Q1 PNP + Q2 NPN + relé)">
+            <img class="img-slot" style="margin-bottom: 18px; aspect-ratio: 16/6;" src="./imagenes/WhatsApp Image 2026-09-01 at 9.34.23 PM.jpeg" alt="esquemático de la Alternativa 1 (LDR + Q1 PNP + Q2 NPN + relé)">
             <div class="card">
               <h3 class="card__title">Solución de doble BJT con acoplamiento PNP/NPN</h3>
               <p class="card__text">Esta alternativa implementa una etapa de detección con LDR, potenciómetro y un par de transistores complementarios (BC557 PNP y BC547 NPN). Al disminuir la luz, la resistencia del LDR aumenta y eleva la tensión de entrada, lo que activa al transistor PNP (Q1) para inyectar corriente de base al transistor NPN (Q2); este último entra en saturación y energiza la bobina del relé de DC, el cual conmuta la carga de corriente alterna aislada galvánicamente y protegida contra picos inductivos mediante el diodo 1N4004 (D1) en antiparalelo.</p>
@@ -373,7 +373,7 @@
           </div>
 
           <div class="tabs__panel" data-panel="alt2">
-            <img class="img-slot" style="margin-bottom: 18px; aspect-ratio: 16/6;" src="D:\Descargas\ELECTRONICA 1\WhatsApp Image 2026-08-28 at 5.33.20 PM.jpeg" alt="esquemático de la Alternativa 2 (LDR + Q1 NPN + Q2 NPN en cascada)">
+            <img class="img-slot" style="margin-bottom: 18px; aspect-ratio: 16/6;" src="./imagenes/WhatsApp Image 2026-08-28 at 5.33.20 PM.jpeg" alt="esquemático de la Alternativa 2 (LDR + Q1 NPN + Q2 NPN en cascada)">
             <div class="card">
               <h3 class="card__title">Solución por inversión lógica con par BJT NPN</h3>
               <p class="card__text">Esta configuración utiliza un divisor de tensión con LDR y potenciómetro conectado a dos transistores NPN homogéneos (BC547) en cascada para lograr una conmutación por lógica inversa. En presencia de luz natural, la baja resistencia del LDR satura a Q1 y deriva a tierra la corriente de base de Q2, manteniéndolo apagado; por el contrario, en la oscuridad el LDR aumenta su resistencia, lleva a Q1 al estado de corte y permite que la corriente fluya hacia la base de Q2, saturándolo para activar el relé y energizar la carga de alta potencia.</p>
