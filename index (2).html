@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Iluminación Automática con Sensor LDR</title>
+
+<!--
+  ============================================================================
+  FUENTES Y LIBRERÍAS EXTERNAS
+  ============================================================================
+  - Google Fonts "Inter": tipografía principal, limpia y muy legible en UI.
+  - Google Fonts "Fira Code": tipografía monoespaciada, usada para fórmulas,
+    valores técnicos y etiquetas tipo "código" (le da el toque "developer").
+  - Lucide Icons: librería de iconos SVG vía CDN. Se referencian con
+    <i data-lucide="nombre-icono"></i> y luego, en el JS, la función
+    lucide.createIcons() los convierte automáticamente en SVG reales.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+
+<!--
+  ============================================================================
+  ESTRUCTURA HTML SEMÁNTICA
+  ============================================================================
+  <header>  → cabecera fija con branding + barra de progreso
+  <main>    → contenedor de TODAS las diapositivas (<section class="slide">)
+  <nav>     → controles de navegación (anterior/siguiente + puntos)
+  Cada diapositiva es un <section> independiente con un id único
+  (slide-1, slide-2, ...) para que JS pueda referenciarlas fácilmente.
+  ============================================================================
+-->
+
+<div class="app">
+
+  <!-- ============================= HEADER ============================= -->
+  <header class="topbar">
+    <div class="topbar__brand">
+      <i data-lucide="lightbulb"></i>
+      <span>FASE 1 · CONOCER</span>
+    </div>
+    <div class="topbar__progress-track" aria-hidden="true">
+      <div class="topbar__progress-fill" id="progressFill"></div>
+    </div>
+    <div class="topbar__counter">
+      <span id="counterCurrent">01</span>
+      <span class="topbar__counter-sep">/</span>
+      <span id="counterTotal">09</span>
+    </div>
+  </header>
+
+  <!-- ============================= SLIDES =============================
+       PLACEHOLDER — el contenido de cada <section class="slide"> se
+       inserta en el siguiente paso para mantener el archivo legible.
+  -->
+  <main class="slides" id="slidesContainer">
+
+    <!-- ======================================================================
+         DIAPOSITIVA 1 — PORTADA
+         ====================================================================== -->
+    <section class="slide" id="slide-1">
+      <div class="slide__inner cover">
+        <div>
+          <span class="cover__badge"><i data-lucide="cpu"></i> ELECTRÓNICA I · 25620 · FASE 1</span>
+          <h1 class="cover__title">Sistema Electrónico de Iluminación Automática</h1>
+          <p class="cover__subtitle">Diseño de un módulo de control de luminarias mediante sensor LDR y dispositivos semiconductores, orientado a reducir el desperdicio energético en pasillos, bodegas y áreas de acceso intermitente.</p>
+
+          <div class="cover__meta">
+            <div class="cover__meta-row">
+              <i data-lucide="users"></i>
+              <span class="cover__meta-label">Integrantes</span>
+              <span class="cover__meta-value">Molina Sebastián · Morales José · Polanía Juan Pablo · Rojas Santiago</span>
+            </div>
+            <div class="cover__meta-row">
+              <i data-lucide="graduation-cap"></i>
+              <span class="cover__meta-label">Docente</span>
+              <span class="cover__meta-value">Ing. Meléndez Pertuz Farid Alexander</span>
+            </div>
+            <div class="cover__meta-row">
+              <i data-lucide="book-open"></i>
+              <span class="cover__meta-label">Título provisional</span>
+              <span class="cover__meta-value">Diseño de un sistema electrónico de iluminación automática mediante sensor LDR y dispositivos semiconductores.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="cover__visual">
+          <img class="img-slot img-slot--tall" src="D:\Descargas\ELECTRONICA 1\Gemini_Generated_Image_ml5ae6ml5ae6ml5a.jpg" alt="foto o render del módulo de iluminación">
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         DIAPOSITIVA 2 — PLANTEAMIENTO DEL PROBLEMA
+         ====================================================================== -->
+    <section class="slide" id="slide-2">
+      <div class="slide__inner">
+        <span class="slide__eyebrow"><i data-lucide="alert-triangle"></i> Planteamiento del problema</span>
+        <h2 class="slide__title">Tres retos técnicos frenan el prototipo inicial</h2>
+        <p class="slide__lead">Una empresa dedicada al desarrollo de soluciones electrónicas para automatización a pequeña escala recibió la solicitud de diseñar un módulo de iluminación automática destinado a pasillos, bodegas y áreas de acceso intermitente. La meta es eliminar el desperdicio energético provocado por luminarias encendidas de forma innecesaria cuando se dispone de suficiente luz natural. Para automatizar la activación de la carga, el sistema debe monitorear el entorno mediante un sensor fotorresistivo (LDR); sin embargo, durante el desarrollo de la etapa inicial del prototipo se identificaron tres retos técnicos:</p>
+
+        <div class="grid grid--3">
+          <div class="card">
+            <div class="card__icon"><i data-lucide="plug-zap"></i></div>
+            <h3 class="card__title">Inestabilidad y vulnerabilidad en la alimentación</h3>
+            <p class="card__text">Una conexión errónea de la fuente con polaridad invertida puede destruir la electrónica de control. Asimismo, se requieren niveles de voltaje DC regulados para evitar variaciones bruscas que alteren el umbral de disparo o dañen los semiconductores.</p>
+          </div>
+          <div class="card">
+            <div class="card__icon"><i data-lucide="gauge"></i></div>
+            <h3 class="card__title">Incapacidad del sensor para manejar potencia</h3>
+            <p class="card__text">El LDR varía su resistencia interna en función de la radiancia incidente, pero no posee la capacidad de corriente ni disipación de potencia para alimentar la lámpara directamente. Se requiere una etapa de acoplamiento que interprete la señal del sensor y conmute la carga.</p>
+          </div>
+          <div class="card">
+            <div class="card__icon"><i data-lucide="thermometer"></i></div>
+            <h3 class="card__title">Pérdidas de potencia y falta de eficiencia</h3>
+            <p class="card__text">El diseño inicial presenta consumo de corriente continuo en la etapa de control e ineficiencia por disipación térmica, requiriendo la evaluación de alternativas semiconductoras con mayor velocidad de respuesta y menor caída de potencia.</p>
+          </div>
+        </div>
+
+        <img class="img-slot img-slot--wide" style="margin-top: 18px;" src="D:\Descargas\ELECTRONICA 1\Gemini_Generated_Image_dzn68tdzn68tdzn6.jpg" alt="pasillo/bodega con iluminación intermitente, o diagrama de bloques del sistema">
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         DIAPOSITIVA 3 — JUSTIFICACIÓN
+         ====================================================================== -->
+    <section class="slide" id="slide-3">
+      <div class="slide__inner">
+        <span class="slide__eyebrow"><i data-lucide="scale"></i> Justificación</span>
+        <h2 class="slide__title">Por qué vale la pena resolver este problema</h2>
+        <p class="slide__lead">El proyecto conecta un caso de automatización real con los fundamentos teóricos y prácticos de la electrónica de semiconductores.</p>
+
+        <div class="grid grid--4">
+          <div class="card">
+            <div class="card__icon"><i data-lucide="battery-charging"></i></div>
+            <h3 class="card__title">Eficiencia energética y ahorro operacional</h3>
+            <p class="card__text">Evita el consumo superfluo en iluminación en zonas de tránsito variable, reduciendo costos operativos y prolongando la vida útil de los elementos de iluminación.</p>
+          </div>
+          <div class="card">
+            <div class="card__icon"><i data-lucide="atom"></i></div>
+            <h3 class="card__title">Integración teórica de la física de semiconductores</h3>
+            <p class="card__text">Permite aplicar el comportamiento de junturas PN, modulación de canal, caracterización de zonas de operación y fenómenos de transferencia térmica en dispositivos de estado sólido.</p>
+          </div>
+          <div class="card">
+            <div class="card__icon"><i data-lucide="layers"></i></div>
+            <h3 class="card__title">Integración de subsistemas en hardware</h3>
+            <p class="card__text">Reúne sensores de variabilidad resistiva, etapas de protección contra transitorios/polaridad, regulación de voltaje, acoplamiento de señal y conmutación de cargas de potencia.</p>
+          </div>
+          <div class="card">
+            <div class="card__icon"><i data-lucide="settings-2"></i></div>
+            <h3 class="card__title">Optimización e ingeniería de confiabilidad</h3>
+            <p class="card__text">Facilita el análisis comparativo entre tecnologías de conmutación para maximizar el rendimiento eléctrico del producto final.</p>
+          </div>
+        </div>
+
+        <img class="img-slot img-slot--wide" style="margin-top: 18px;" src="D:\Descargas\ELECTRONICA 1\Gemini_Generated_Image_rag30arag30arag3.jpg" alt="gráfico de ahorro energético o comparación de consumo antes/después">
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         DIAPOSITIVA 4 — OBJETIVOS
+         ====================================================================== -->
+    <section class="slide" id="slide-4">
+      <div class="slide__inner">
+        <span class="slide__eyebrow"><i data-lucide="target"></i> Objetivos</span>
+        <h2 class="slide__title">Del sensado a la conmutación eficiente</h2>
+
+        <div class="card" style="margin-bottom: 20px; border-color: var(--glass-border-hi);">
+          <div class="card__icon"><i data-lucide="flag"></i></div>
+          <h3 class="card__title">Objetivo general</h3>
+          <p class="card__text">Diseñar un sistema electrónico de control automático de iluminación capaz de detectar las condiciones de luz ambiental mediante un sensor LDR, proteger la etapa de alimentación y controlar una carga de iluminación mediante la integración progresiva de dispositivos semiconductores.</p>
+        </div>
+
+        <div class="checklist">
+          <div class="checklist-item">
+            <div class="checklist-item__check"><i data-lucide="check"></i></div>
+            <div>
+              <div class="checklist-item__title">Analizar el sensor LDR</div>
+              <div class="checklist-item__text">Analizar el funcionamiento y las características eléctricas de un sensor LDR ante variaciones de iluminación ambiental.</div>
+            </div>
+          </div>
+          <div class="checklist-item">
+            <div class="checklist-item__check"><i data-lucide="check"></i></div>
+            <div>
+              <div class="checklist-item__title">Investigar la protección de alimentación</div>
+              <div class="checklist-item__text">Investigar el comportamiento de dispositivos semiconductores para la protección contra polaridad inversa y la regulación de voltaje del circuito de control.</div>
+            </div>
+          </div>
+          <div class="checklist-item">
+            <div class="checklist-item__check"><i data-lucide="check"></i></div>
+            <div>
+              <div class="checklist-item__title">Identificar el acondicionamiento de señal</div>
+              <div class="checklist-item__text">Identificar configuraciones electrónicas capaces de acondicionar la señal de la fotorresistencia para conmutar la carga de iluminación.</div>
+            </div>
+          </div>
+          <div class="checklist-item">
+            <div class="checklist-item__check"><i data-lucide="check"></i></div>
+            <div>
+              <div class="checklist-item__title">Comparar tecnologías de conmutación</div>
+              <div class="checklist-item__text">Comparar el desempeño técnico entre diferentes tecnologías de conmutación de estado sólido para reducir pérdidas de potencia y mejorar la eficiencia del sistema.</div>
+            </div>
+          </div>
+        </div>
+
+        <img class="img-slot img-slot--wide" style="margin-top: 18px;" src="D:\Descargas\ELECTRONICA 1\Gemini_Generated_Image_lklc8xlklc8xlklc.jpg" alt="mapa de objetivos o línea de tiempo del proyecto">
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         DIAPOSITIVA 5 — MARCO TEÓRICO (acordeón)
+         ====================================================================== -->
+    <section class="slide" id="slide-5">
+      <div class="slide__inner">
+        <span class="slide__eyebrow"><i data-lucide="book-marked"></i> Marco teórico</span>
+        <h2 class="slide__title" style="margin-bottom: 22px;">Los seis conceptos base del diseño</h2>
+
+        <ul class="accordion" id="accordionTeorico">
+          <li class="accordion-item is-open">
+            <button class="accordion-header">
+              <span class="accordion-header__icon"><i data-lucide="sun"></i></span>
+              Sensor LDR (fotorresistencia)
+              <span class="accordion-header__chevron"><i data-lucide="chevron-down"></i></span>
+            </button>
+            <div class="accordion-body-wrap">
+              <div class="accordion-body"><div class="accordion-body__inner">
+                El sensor LDR (Light Dependent Resistor), también denominado fotorresistencia o fotocelda, es un dispositivo cuya resistencia eléctrica varía en función de la cantidad de luz que incide sobre su superficie: al aumentar la iluminación, la resistencia disminuye; cuando el nivel de iluminación disminuye, la resistencia aumenta considerablemente. Su funcionamiento se basa en la fotoconductividad: cuando la radiación luminosa incide sobre el material semiconductor, los fotones aportan energía a los electrones, y si esta energía permite su transición a niveles de mayor energía, aumenta la cantidad de portadores de carga disponibles y, por tanto, la conductividad eléctrica del material. Existe entonces una relación inversa entre iluminación y resistencia, que puede aproximarse mediante una expresión de tipo potencial.
+                <div class="formula">R<sub>LDR</sub> — relación potencial inversa con E (iluminación) y γ (constante del sensor)</div>
+              </div></div>
+            </div>
+          </li>
+
+          <li class="accordion-item">
+            <button class="accordion-header">
+              <span class="accordion-header__icon"><i data-lucide="git-branch"></i></span>
+              Diodos semiconductores
+              <span class="accordion-header__chevron"><i data-lucide="chevron-down"></i></span>
+            </button>
+            <div class="accordion-body-wrap">
+              <div class="accordion-body"><div class="accordion-body__inner">
+                Un diodo semiconductor es un dispositivo formado principalmente por una unión entre un material semiconductor tipo P y uno tipo N, conocida como juntura PN, que permite controlar el paso de corriente según la polaridad del voltaje aplicado. En polarización directa (ánodo positivo respecto al cátodo), la barrera de potencial de la juntura disminuye y el dispositivo conduce; en un análisis simplificado, los diodos de silicio suelen considerarse con una caída de tensión directa aproximada de 0.7 V, aunque en un dispositivo real depende de la corriente y la temperatura. En polarización inversa, la región de agotamiento aumenta y dificulta el paso de corriente, lo que permite usar los diodos como protección contra polaridad inversa o contra fenómenos producidos por cargas inductivas.
+                <div class="formula">V<sub>F</sub> ≈ 0.7 V (silicio, polarización directa)</div>
+              </div></div>
+            </div>
+          </li>
+
+          <li class="accordion-item">
+            <button class="accordion-header">
+              <span class="accordion-header__icon"><i data-lucide="waves"></i></span>
+              Regulación de voltaje
+              <span class="accordion-header__chevron"><i data-lucide="chevron-down"></i></span>
+            </button>
+            <div class="accordion-body-wrap">
+              <div class="accordion-body"><div class="accordion-body__inner">
+                La regulación de voltaje consiste en mantener una tensión de salida dentro de un valor determinado a pesar de variaciones en la tensión de entrada o en la corriente demandada por la carga, lo cual es importante porque los componentes electrónicos requieren condiciones de alimentación adecuadas para funcionar correctamente. En un regulador lineal, el voltaje de salida se supervisa mediante un sistema de realimentación: el circuito compara la tensión de salida con una referencia interna y ajusta un elemento de control para compensar las variaciones de entrada o carga. Entre los métodos básicos se encuentran los diodos Zener, usados en aplicaciones sencillas como referencias o reguladores de tensión, y los reguladores integrados lineales, más estables; los reguladores LDO (Low Dropout) son un tipo de regulador lineal diseñado para operar con una diferencia relativamente pequeña entre el voltaje de entrada y el de salida.
+              </div></div>
+            </div>
+          </li>
+
+          <li class="accordion-item">
+            <button class="accordion-header">
+              <span class="accordion-header__icon"><i data-lucide="toggle-left"></i></span>
+              Transistor BJT como interruptor
+              <span class="accordion-header__chevron"><i data-lucide="chevron-down"></i></span>
+            </button>
+            <div class="accordion-body-wrap">
+              <div class="accordion-body"><div class="accordion-body__inner">
+                El transistor de unión bipolar o BJT (Bipolar Junction Transistor) es un dispositivo semiconductor formado por tres regiones denominadas emisor, base y colector; en términos generales, una corriente aplicada en la base permite controlar una corriente de mayor magnitud que circula entre el colector y el emisor. Una de sus aplicaciones más importantes es su utilización como interruptor electrónico: en esta aplicación no se busca que el transistor funcione como amplificador, sino que opere principalmente entre dos estados, corte y saturación.
+              </div></div>
+            </div>
+          </li>
+
+          <li class="accordion-item">
+            <button class="accordion-header">
+              <span class="accordion-header__icon"><i data-lucide="zap"></i></span>
+              Transistor MOSFET
+              <span class="accordion-header__chevron"><i data-lucide="chevron-down"></i></span>
+            </button>
+            <div class="accordion-body-wrap">
+              <div class="accordion-body"><div class="accordion-body__inner">
+                El MOSFET (Metal-Oxide-Semiconductor Field-Effect Transistor) es un transistor de efecto de campo cuyos terminales principales son compuerta (gate), drenador (drain) y fuente (source). A diferencia del BJT, su funcionamiento se controla principalmente mediante el voltaje aplicado entre la compuerta y la fuente. Una de sus principales características es su alta impedancia de entrada, por lo que la compuerta requiere muy poca corriente continua para controlar el dispositivo, lo que representa una ventaja cuando se desea controlar una carga con una señal de baja potencia. Los MOSFET son ampliamente utilizados en aplicaciones de conmutación debido a su alta impedancia de entrada, velocidad de conmutación y capacidad para controlar diferentes niveles de corriente.
+                <div class="formula">V<sub>GS</sub> controla el canal drain–source</div>
+              </div></div>
+            </div>
+          </li>
+
+          <li class="accordion-item">
+            <button class="accordion-header">
+              <span class="accordion-header__icon"><i data-lucide="lamp"></i></span>
+              Carga de iluminación
+              <span class="accordion-header__chevron"><i data-lucide="chevron-down"></i></span>
+            </button>
+            <div class="accordion-body-wrap">
+              <div class="accordion-body"><div class="accordion-body__inner">
+                La carga de iluminación corresponde al elemento que transforma la energía eléctrica en iluminación; dependiendo del diseño del sistema, esta carga puede ser una lámpara LED, una bombilla u otro dispositivo de iluminación. Para seleccionar correctamente los componentes encargados de controlarla es necesario conocer sus parámetros eléctricos nominales, principalmente el voltaje, la corriente y la potencia. En corriente continua, la potencia eléctrica puede expresarse como P = V × I; por tanto, si se conocen dos de estas variables, es posible determinar la tercera, siempre considerando las condiciones reales de funcionamiento del dispositivo.
+                <div class="formula">P = V × I (potencia en corriente continua)</div>
+              </div></div>
+            </div>
+          </li>
+        </ul>
+
+        <img class="img-slot img-slot--wide" style="margin-top: 18px;" src="D:\Descargas\ELECTRONICA 1\ldr (1).jpg" alt="curva característica del LDR, símbolo del diodo o datasheet del BJT/MOSFET">
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         DIAPOSITIVA 6 — TABLA: DIFICULTADES TÉCNICAS
+         ====================================================================== -->
+    <section class="slide" id="slide-6">
+      <div class="slide__inner">
+        <span class="slide__eyebrow"><i data-lucide="table"></i> Identificación de dificultades</span>
+        <h2 class="slide__title">De cada reto técnico a una pregunta de investigación</h2>
+        <p class="slide__lead">Cada dificultad técnica del planteamiento del problema se traduce en preguntas concretas y en los conceptos que hay que dominar para responderlas.</p>
+
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Dificultad técnica</th>
+                <th>Preguntas de investigación</th>
+                <th>Conceptos clave</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Protección y alimentación</td>
+                <td>¿Qué consecuencias físicas tiene la inversión de polaridad? ¿Cómo asegurar una caída de voltaje baja en protección? ¿Qué regulador garantiza estabilidad en la etapa de control?</td>
+                <td>Diodo rectificador (V<sub>F</sub>, polarización directa e inversa); rizado y voltaje de línea DC</td>
+              </tr>
+              <tr>
+                <td>Interpretación de señal y carga</td>
+                <td>¿Cómo transformar ΔR en un nivel de voltaje conmutable? ¿Por qué el BJT requiere corriente de base mínima para saturación?</td>
+                <td>Sensor LDR y divisor de tensión; transistor BJT (corte/saturación); I<sub>B</sub>, I<sub>C</sub> y ganancia β; relé y diodo de rueda libre (flyback)</td>
+              </tr>
+              <tr>
+                <td>Optimización de conmutación</td>
+                <td>¿Cómo influye el control por voltaje sobre el consumo en reposo? ¿Qué impacto tiene la capacitancia de compuerta en la velocidad?</td>
+                <td>Conmutación por voltaje vs. corriente; eficiencia energética e impedancia de entrada</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         DIAPOSITIVA 7 — POSIBLES SOLUCIONES (tabs)
+         ====================================================================== -->
+    <section class="slide" id="slide-7">
+      <div class="slide__inner">
+        <span class="slide__eyebrow"><i data-lucide="split"></i> Posibles soluciones</span>
+        <h2 class="slide__title" style="margin-bottom: 22px;">Dos alternativas de conmutación con BJT</h2>
+
+        <div class="tabs" id="tabsSoluciones">
+          <div class="tabs__list" role="tablist">
+            <button class="tabs__btn is-active" data-tab="alt1">Alternativa 1</button>
+            <button class="tabs__btn" data-tab="alt2">Alternativa 2</button>
+          </div>
+
+          <div class="tabs__panel is-active" data-panel="alt1">
+            <img class="img-slot" style="margin-bottom: 18px; aspect-ratio: 16/6;" src="D:\Descargas\ELECTRONICA 1\WhatsApp Image 2026-09-01 at 9.34.23 PM.jpeg" alt="esquemático de la Alternativa 1 (LDR + Q1 PNP + Q2 NPN + relé)">
+            <div class="card">
+              <h3 class="card__title">Solución de doble BJT con acoplamiento PNP/NPN</h3>
+              <p class="card__text">Esta alternativa implementa una etapa de detección con LDR, potenciómetro y un par de transistores complementarios (BC557 PNP y BC547 NPN). Al disminuir la luz, la resistencia del LDR aumenta y eleva la tensión de entrada, lo que activa al transistor PNP (Q1) para inyectar corriente de base al transistor NPN (Q2); este último entra en saturación y energiza la bobina del relé de DC, el cual conmuta la carga de corriente alterna aislada galvánicamente y protegida contra picos inductivos mediante el diodo 1N4004 (D1) en antiparalelo.</p>
+            </div>
+          </div>
+
+          <div class="tabs__panel" data-panel="alt2">
+            <img class="img-slot" style="margin-bottom: 18px; aspect-ratio: 16/6;" src="D:\Descargas\ELECTRONICA 1\WhatsApp Image 2026-08-28 at 5.33.20 PM.jpeg" alt="esquemático de la Alternativa 2 (LDR + Q1 NPN + Q2 NPN en cascada)">
+            <div class="card">
+              <h3 class="card__title">Solución por inversión lógica con par BJT NPN</h3>
+              <p class="card__text">Esta configuración utiliza un divisor de tensión con LDR y potenciómetro conectado a dos transistores NPN homogéneos (BC547) en cascada para lograr una conmutación por lógica inversa. En presencia de luz natural, la baja resistencia del LDR satura a Q1 y deriva a tierra la corriente de base de Q2, manteniéndolo apagado; por el contrario, en la oscuridad el LDR aumenta su resistencia, lleva a Q1 al estado de corte y permite que la corriente fluya hacia la base de Q2, saturándolo para activar el relé y energizar la carga de alta potencia.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         DIAPOSITIVA 8 — REQUISITOS Y CRITERIOS DE DISEÑO
+         ====================================================================== -->
+    <section class="slide" id="slide-8">
+      <div class="slide__inner">
+        <span class="slide__eyebrow"><i data-lucide="clipboard-check"></i> Requisitos de diseño</span>
+        <h2 class="slide__title">Lo que el sistema final debe cumplir</h2>
+
+        <div class="checklist">
+          <div class="checklist-item">
+            <div class="checklist-item__check"><i data-lucide="check"></i></div>
+            <div>
+              <div class="checklist-item__title">Sensado</div>
+              <div class="checklist-item__text">Responder dinámicamente a umbrales configurables de luz ambiental mediante el LDR.</div>
+            </div>
+          </div>
+          <div class="checklist-item">
+            <div class="checklist-item__check"><i data-lucide="check"></i></div>
+            <div>
+              <div class="checklist-item__title">Lógica de conmutación</div>
+              <div class="checklist-item__text">Desactivar la carga durante el día (alta luz) y activarla automáticamente bajo el umbral nocturno (baja luz).</div>
+            </div>
+          </div>
+          <div class="checklist-item">
+            <div class="checklist-item__check"><i data-lucide="check"></i></div>
+            <div>
+              <div class="checklist-item__title">Protección electrónica</div>
+              <div class="checklist-item__text">Inmunidad contra inversiones fortuitas de polaridad en la entrada de alimentación.</div>
+            </div>
+          </div>
+          <div class="checklist-item">
+            <div class="checklist-item__check"><i data-lucide="check"></i></div>
+            <div>
+              <div class="checklist-item__title">Eficiencia energética</div>
+              <div class="checklist-item__text">Disminuir el consumo de corriente en reposo de la etapa de control e incrementar la velocidad de conmutación.</div>
+            </div>
+          </div>
+        </div>
+
+        
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         DIAPOSITIVA 9 — CONCLUSIÓN
+         ====================================================================== -->
+    <section class="slide" id="slide-9">
+      <div class="slide__inner">
+        <span class="slide__eyebrow"><i data-lucide="flag-triangle-right"></i> Conclusión</span>
+        <h2 class="slide__title">De la teoría al prototipo funcional</h2>
+
+        <div class="closing-banner">
+          Esta fase de "Conocer" deja establecido el problema, sus retos técnicos y el marco teórico necesario para avanzar hacia el diseño detallado: seleccionar entre las dos alternativas de conmutación propuestas (doble BJT con acoplamiento PNP/NPN o inversión lógica con par BJT NPN), dimensionar los componentes y validar el sistema contra los requisitos de sensado, lógica de conmutación, protección electrónica y eficiencia energética definidos en los criterios de diseño.
+        </div>
+
+        <div class="grid grid--2" style="margin-top: 22px;">
+          
+          
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================= NAV ============================= -->
+  <nav class="controls" aria-label="Navegación de diapositivas">
+    <button class="nav-btn" id="btnPrev" aria-label="Diapositiva anterior">
+      <i data-lucide="chevron-left"></i>
+      <span>Anterior</span>
+    </button>
+
+    <div class="dots" id="dotsContainer" role="tablist" aria-label="Ir a diapositiva">
+      <!-- Los puntos se generan dinámicamente por JavaScript -->
+    </div>
+
+    <button class="nav-btn nav-btn--primary" id="btnNext" aria-label="Siguiente diapositiva">
+      <span>Siguiente</span>
+      <i data-lucide="chevron-right"></i>
+    </button>
+  </nav>
+
+  <div class="kbd-hint">
+    <i data-lucide="keyboard"></i>
+    <span>Usa <kbd>←</kbd> <kbd>→</kbd> para navegar</span>
+  </div>
+
+</div>
+
+<script>
+/* ============================================================================
+   JAVASCRIPT — LÓGICA DE LA PRESENTACIÓN
+   ============================================================================
+   Todo el script es JS "vanilla" (sin frameworks). Está dividido en
+   bloques comentados para que puedas seguir el flujo paso a paso:
+
+     1. Inicialización de íconos (Lucide)
+     2. Motor de diapositivas (mostrar/ocultar, progreso, contador, puntos)
+     3. Navegación (botones Anterior/Siguiente, puntos, teclado)
+     4. Componente Acordeón (Marco teórico)
+     5. Componente Tabs (Posibles soluciones)
+
+   Usamos "IIFE" (Immediately Invoked Function Expression) implícitas y
+   'const' en vez de 'var' para mantener las variables encapsuladas y
+   evitar contaminar el alcance global (buenas prácticas modernas de JS).
+   ============================================================================ */
+
+// Esperamos a que TODO el HTML esté cargado antes de tocar el DOM.
+document.addEventListener('DOMContentLoaded', () => {
+
+  /* ==========================================================================
+     1. ÍCONOS LUCIDE
+     ==========================================================================
+     lucide.createIcons() recorre el documento buscando etiquetas
+     <i data-lucide="nombre"> y las reemplaza por el SVG correspondiente.
+     Debe llamarse después de que el HTML ya exista en el DOM.
+     ========================================================================== */
+  lucide.createIcons();
+
+
+  /* ==========================================================================
+     2. MOTOR DE DIAPOSITIVAS
+     ==========================================================================
+     Guardamos en un array todas las <section class="slide"> en el orden
+     en que aparecen en el HTML. "currentIndex" es la única fuente de
+     verdad de en qué diapositiva estamos; cada vez que cambia, llamamos
+     a goToSlide() para sincronizar TODO lo visual con ese número.
+     ========================================================================== */
+  const slides   = Array.from(document.querySelectorAll('.slide'));
+  const total    = slides.length;
+  let currentIndex = 0; // empezamos en la diapositiva 0 (Portada)
+
+  // Referencias a los elementos de la interfaz que dependen del índice actual
+  const progressFill   = document.getElementById('progressFill');
+  const counterCurrent  = document.getElementById('counterCurrent');
+  const counterTotal    = document.getElementById('counterTotal');
+  const dotsContainer   = document.getElementById('dotsContainer');
+  const btnPrev         = document.getElementById('btnPrev');
+  const btnNext         = document.getElementById('btnNext');
+
+  counterTotal.textContent = String(total).padStart(2, '0');
+
+  // Generamos dinámicamente un botón "punto" por cada diapositiva.
+  // Así, si mañana agregas o quitas una <section class="slide">, los
+  // puntos se ajustan solos sin tocar el JS ni el HTML de la nav.
+  slides.forEach((_, i) => {
+    const dot = document.createElement('button');
+    dot.className = 'dot';
+    dot.setAttribute('role', 'tab');
+    dot.setAttribute('aria-label', `Ir a la diapositiva ${i + 1}`);
+    dot.addEventListener('click', () => goToSlide(i));
+    dotsContainer.appendChild(dot);
+  });
+  const dots = Array.from(dotsContainer.querySelectorAll('.dot'));
+
+  /**
+   * goToSlide(index)
+   * -----------------
+   * Función central de navegación. Recibe el índice de la diapositiva
+   * destino y actualiza:
+   *   a) las clases .is-active / .is-prev de cada <section>
+   *   b) la barra de progreso (ancho en %)
+   *   c) el contador numérico "01 / 09"
+   *   d) qué punto está resaltado
+   *   e) si los botones Anterior/Siguiente deben deshabilitarse
+   */
+  function goToSlide(index) {
+    // "clamp": evita salirnos del rango válido [0, total-1]
+    const nextIndex = Math.max(0, Math.min(index, total - 1));
+    const isForward = nextIndex >= currentIndex;
+
+    slides.forEach((slide, i) => {
+      slide.classList.remove('is-active', 'is-prev');
+      if (i === nextIndex) {
+        slide.classList.add('is-active');
+        // Al entrar a una diapositiva, la regresamos al scroll superior
+        slide.scrollTop = 0;
+      } else if (i === currentIndex && !isForward) {
+        // Marca la diapositiva que se va, para que la transición de
+        // salida se sienta "hacia atrás" en vez de "hacia adelante"
+        slide.classList.add('is-prev');
+      }
+    });
+
+    currentIndex = nextIndex;
+
+    // Actualiza barra de progreso: (diapositiva actual + 1) / total * 100
+    const progressPct = ((currentIndex + 1) / total) * 100;
+    progressFill.style.width = `${progressPct}%`;
+
+    // Actualiza contador numérico con cero a la izquierda (01, 02, ...)
+    counterCurrent.textContent = String(currentIndex + 1).padStart(2, '0');
+
+    // Resalta el punto correspondiente
+    dots.forEach((dot, i) => dot.classList.toggle('is-active', i === currentIndex));
+
+    // Deshabilita "Anterior" en la primera diapositiva y "Siguiente" en la última
+    btnPrev.disabled = currentIndex === 0;
+    btnNext.disabled = currentIndex === total - 1;
+  }
+
+
+  /* ==========================================================================
+     3. NAVEGACIÓN: BOTONES Y TECLADO
+     ==========================================================================
+     - Los botones simplemente avanzan/retroceden 1 posición.
+     - El listener de teclado escucha en todo el documento (window) y
+       reacciona a las teclas de flecha izquierda/derecha, que es el
+       requisito de "soporte para navegación con el teclado".
+     ========================================================================== */
+  btnNext.addEventListener('click', () => goToSlide(currentIndex + 1));
+  btnPrev.addEventListener('click', () => goToSlide(currentIndex - 1));
+
+  window.addEventListener('keydown', (event) => {
+    // Si el usuario está escribiendo dentro de un campo de texto,
+    // no interceptamos las flechas (no aplica aquí, pero es buena práctica).
+    if (event.key === 'ArrowRight') {
+      goToSlide(currentIndex + 1);
+    } else if (event.key === 'ArrowLeft') {
+      goToSlide(currentIndex - 1);
+    }
+  });
+
+  // Inicializamos la interfaz en el estado de la diapositiva 0
+  goToSlide(0);
+
+
+  /* ==========================================================================
+     4. COMPONENTE: ACORDEÓN (usado en "Marco teórico")
+     ==========================================================================
+     Cada <li class="accordion-item"> contiene un botón de cabecera y un
+     panel de contenido. Al hacer clic en la cabecera, alternamos la
+     clase .is-open en su <li> padre; el CSS se encarga del resto
+     (rotar el chevron y animar la altura con grid-template-rows).
+     No cerramos los demás ítems al abrir uno nuevo: el usuario puede
+     tener varios conceptos abiertos a la vez para comparar.
+     ========================================================================== */
+  document.querySelectorAll('.accordion-header').forEach((header) => {
+    header.addEventListener('click', () => {
+      const item = header.closest('.accordion-item');
+      item.classList.toggle('is-open');
+    });
+  });
+
+
+  /* ==========================================================================
+     5. COMPONENTE: TABS (usado en "Posibles soluciones")
+     ==========================================================================
+     Patrón estándar de pestañas: cada botón .tabs__btn tiene un atributo
+     data-tab="alt1" que coincide con el data-panel="alt1" del panel que
+     debe mostrar. Al hacer clic:
+       1. Quitamos .is-active de TODOS los botones y paneles del mismo
+          grupo de tabs.
+       2. Se la ponemos solo al botón clicado y a su panel coincidente.
+     Esto permite tener varios grupos de tabs en la misma página sin que
+     se interfieran entre sí, porque cada búsqueda de "hermanos" se hace
+     dentro del contenedor .tabs más cercano (closest).
+     ========================================================================== */
+  document.querySelectorAll('.tabs__btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const tabsWrap = btn.closest('.tabs');
+      const targetKey = btn.dataset.tab;
+
+      tabsWrap.querySelectorAll('.tabs__btn').forEach((b) =>
+        b.classList.toggle('is-active', b === btn)
+      );
+      tabsWrap.querySelectorAll('.tabs__panel').forEach((panel) =>
+        panel.classList.toggle('is-active', panel.dataset.panel === targetKey)
+      );
+    });
+  });
+
+});
+</script>
+
+</body>
+</html>
